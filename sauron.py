@@ -1,6 +1,24 @@
 import numpy as np
 import keyboard as kb
 from tkinter import Tk
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+
+def refresh_plot(x, y):
+    for current_point in current_points:
+        current_point.remove()
+    current_points.clear()
+
+    plt.xlim(x - 500, x + 500)
+    plt.ylim(y - 500, y + 500)
+
+    current_points.append(plt.Circle((x, y), 10, color='#65fda0', fill=True))
+
+    for current_point in current_points:
+        ax.add_patch(current_point)
+    fig.canvas.draw()
+    fig.canvas.flush_events()
 
 
 def get_blind_info():
@@ -9,6 +27,7 @@ def get_blind_info():
     coords = split[6:9]
     x = float(coords[0])
     z = float(coords[2])
+    refresh_plot(x, z)
 
     angle = np.arctan2(z, x)
 
@@ -68,10 +87,27 @@ def to_mc_angle(angle):
     return int(round(angle))
 
 
-def main():
-    kb.add_hotkey('f3+c', get_blind_info)
-    kb.wait()
-
-
 if __name__ == "__main__":
-    main()
+    current_points = []
+    mpl.rcParams['toolbar'] = 'None'
+    fig = plt.figure(figsize=(5, 5))
+    fig.patch.set_facecolor('#080b14')
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.axis('off')
+
+    circles = []
+    rings = [160, 352, 544, 736, 928, 1120, 1312, 1504, 1696, 1888, 2080, 2272, 2464, 2656, 2848, 3040]
+    rings.reverse()
+
+    for i in range(len(rings)):
+        if i % 2 == 0:
+            circles.append(plt.Circle((0, 0), rings[i], color='#DF3833', fill=True))
+        else:
+            circles.append(plt.Circle((0, 0), rings[i], color='#080b14', fill=True))
+
+    for circle in circles:
+        ax.add_patch(circle)
+
+    kb.add_hotkey('f3+c', get_blind_info)
+
+    plt.show()
